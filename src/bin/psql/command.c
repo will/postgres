@@ -1458,6 +1458,7 @@ exec_command(const char *cmd,
 			free(value);
 		}
 		myopt.nullPrint = NULL;
+		myopt.topt.pager = 0;
 		myopt.title = _("Watch every 2s");
 		myopt.translate_header = true;
 
