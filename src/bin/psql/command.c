@@ -1498,7 +1498,6 @@ exec_command(const char *cmd,
 				PQclear((PGresult *) res);
 	}
 
-
 	/* \x -- set or toggle expanded table representation */
 	else if (strcmp(cmd, "x") == 0)
 	{
