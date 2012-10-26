@@ -1511,6 +1511,8 @@ exec_command(const char *cmd,
 			if (res)
 				printQuery((PGresult *) res, &myopt, pset.queryFout,
 						   pset.logfile);
+				res = NULL;
+ 				free((PGresult *) res);
 
 			/*
 			 * Enable 'watch' cancellations and wait a while before running the
