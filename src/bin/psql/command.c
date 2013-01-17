@@ -1450,7 +1450,6 @@ exec_command(const char *cmd,
 
 		const int		max_watch_delay = 86400;		/* seconds in a day */
 
-
 		initPQExpBuffer(&buf);
 
 		while ((value = psql_scan_slash_option(scan_state,
