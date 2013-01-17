@@ -1461,8 +1461,6 @@ exec_command(const char *cmd,
 			 */
 			if (first && strtol(value, NULL, 10))
 			{
-				first = false;
-
 				sleep = strtol(value, NULL, 10);
 
 				if (sleep < 0)
@@ -1476,6 +1474,7 @@ exec_command(const char *cmd,
 				appendPQExpBufferStr(&buf, value);
 			}
 
+			first = false;
 			free(value);
 		}
 
