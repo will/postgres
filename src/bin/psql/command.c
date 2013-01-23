@@ -1510,6 +1510,7 @@ exec_command(const char *cmd,
 		while (true)
 		{
 			timer = time(NULL);
+			printf("%c[0;0H%c[2J", 0x1b, 0x1b);
 			snprintf(title, sizeof(title), "Watch every %lds\t%s", sleep,
 					 asctime(localtime(&timer)));
 			myopt.title = title;
