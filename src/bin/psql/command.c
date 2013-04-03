@@ -1518,6 +1518,14 @@ exec_command(const char *cmd,
 					 asctime(localtime(&timer)));
 			myopt.title = title;
 
+			if (query_buf)
+				res = PSQLexec(query_buf->data, false);
+			else if (!pset.quiet)
+			{
+				psql_error(_("Query buffer is empty."));
+				goto cleanup;
+			}
+
 			/*
 			 * If SIGINT is sent while the query is processing, PSQLexec will
 			 * consume the interrupt.  The user's intention, though, is to
