@@ -1443,36 +1443,13 @@ exec_command(const char *cmd,
 		printQueryOpt			 myopt = pset.popt;
 		char					 quoted;
 		long					 sleep = 2;
+		int						 i;
 		char					 title[50];
 		time_t					 timer;
 
 		const int		max_watch_delay = 86400;		/* seconds in a day */
 
-		if (query_buf && query_buf->len > 0)
-		{
-			/*
-			 * Check that the query in query_buf has been terminated.  This is
-			 * mostly consistent with behavior from commands like \g.  The
-			 * reason this is here is to prevent terrible things from occuring
-			 * from submitting incomplete input of statements like:
-			 *
-			 *     DELETE FROM foo
-			 *     \watch
-			 *     WHERE....
-			 *
-			 * Wherein \watch will go ahead and send whatever has been
-			 * submitted so far.  So instead, insist that the user terminate
-			 * the query with a semicolon to be safe.
-			 */
-			if (query_buf->data[query_buf->len - 1] != ';')
-			{
-				psql_error(_("Query buffer is not terminated with a ';', "
-							 "ignoring \\watch.\n"));
-
-				goto cleanup;
-			}
-		}
-		else
+		if (!query_buf || query_buf->len <= 0)
 		{
 			psql_error(_("Query buffer is empty, \\watch ignored."));
 
@@ -1488,7 +1465,7 @@ exec_command(const char *cmd,
 		{
 			sleep = strtol(value, NULL, 10);
 
-			if (sleep < 0)
+			if (sleep <= 0)
 				sleep = 1;
 			else if (sleep > max_watch_delay)
 				sleep = max_watch_delay;
@@ -1514,7 +1491,7 @@ exec_command(const char *cmd,
 			if (isatty(fileno(stdin)))
 				printf("%c[0;0H%c[2J", 0x1b, 0x1b);
 
-			snprintf(title, sizeof(title), "Watch every %lds\t%s", sleep,
+			snprintf(title, sizeof(title), _("Watch every %lds\t%s"), sleep,
 					 asctime(localtime(&timer)));
 			myopt.title = title;
 
@@ -1550,7 +1527,7 @@ exec_command(const char *cmd,
 
 					case PGRES_EMPTY_QUERY:
 						psql_error(
-							"\\watch cannot be used with an empty query\n");
+							_("\\watch cannot be used with an empty query\n"));
 						goto cleanup;
 
 					default:
@@ -1566,7 +1543,12 @@ exec_command(const char *cmd,
 			 * query again.
 			 */
 			sigint_interrupt_enabled = true;
-			pg_usleep(1000000 * sleep);
+			for (i = 0; i < sleep; i++)
+			{
+				pg_usleep(1000000L);
+				if (cancel_pressed)
+					break;
+			}
 			sigint_interrupt_enabled = false;
 		}
 
